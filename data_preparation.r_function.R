@@ -6,7 +6,7 @@
 ###                                                                                                                      ###
 ############################################################################################################################
 
-## Most of these functions assume a data.frame as input that is obtained by reading in Toolbox files using Taras Zakharko's
+## Most of these functions assume a data.frame as input (called "corpus") that is obtained by reading in Toolbox files using Taras Zakharko's
 ## R library ToolboxSearch and subsequently converting the resulting corpus object into a data frame using as.data.frame(...)
 
 ## Function to count the number of morphs for each word token in a corpus data frame
@@ -373,9 +373,8 @@ normalize_hoocak = function(words) {
    return(result)
 }
 
-## YOHO!
 
-## Function to delete ...
+## Function to delete [ ] surrounding unclear words in Nǁng
 normalize_nuu = function(words) {
 
    result = c()
@@ -391,8 +390,9 @@ normalize_nuu = function(words) {
    return(result)
 }
 
-ignore_chars="[])-=,?!¿¡.:;\"\'([]"
 
+## Function to count the number of characters (≈ the number of phones) in a word.
+## Characters contained in ignore_chars (mostly punctuation marks) will be ignored during the count.
 count.characterlength.perword = function (corpus, text_tier, word_tier="word.id", ignore_chars="[])=,?!¿¡.*:;\"\'([-]", type="chars", normalize=FALSE) {
   
   length_results = c()
@@ -419,6 +419,8 @@ count.characterlength.perword = function (corpus, text_tier, word_tier="word.id"
   return(length_results)
 }
 
+## Function to count the number of characters (≈ the number of phones) in a whole annotation unit.
+## Characters contained in ignore_chars (mostly punctuation marks) will be ignored during the count.
 length.of.annotation.units.in.characters = function (corpus, ignore_filled_pauses=FALSE, ignore_false_starts=FALSE) {
 
   lengths = corpus$morpheme.id
@@ -458,6 +460,8 @@ length.of.annotation.units.in.characters = function (corpus, ignore_filled_pause
   return(lengths)
 }
 
+## Function to calculate the length of an annotation unit in seconds.
+## (filled pauses and/or false start can be excluded if the respective options are set)
 length.of.annotation.units.in.seconds = function (corpus, ignore_filled_pauses=FALSE, ignore_false_starts=FALSE) {
 
   lengths = corpus$morpheme.id
@@ -517,6 +521,9 @@ length.of.annotation.units.in.seconds = function (corpus, ignore_filled_pauses=F
   return(lengths)
 }
 
+## Function to calculate the length of an annotation unit in seconds by summing together
+## the lengths of all words contained in the annotation unit (thus ignoring silent pauses)
+## (filled pauses and/or false start can be excluded if the respective options are set).
 length.of.annotation.units.from.wordtimes = function (corpus, ignore_filled_pauses=FALSE, ignore_false_starts=FALSE) {
 
   lengths = corpus$morpheme.id
@@ -556,6 +563,7 @@ length.of.annotation.units.from.wordtimes = function (corpus, ignore_filled_paus
   return(lengths)
 }
 
+## Function to count the number of word tokens in a corpus
 length.of.sessions.in.words = function (corpus) {
 
   lengths = corpus$morpheme.id
@@ -570,6 +578,11 @@ length.of.sessions.in.words = function (corpus) {
   return(lengths)
 }
 
+## Function to calculate the extent of code-switching
+## (simply be calculating the relative frequency of words from other languages in an annotation unit).
+## The language a word comes from has to be annotated on a separate Toolbox tier (or column in R.
+## For each word, this function checks whether its annotation on the language_tier given as an argument
+## is contained in the set language_code.
 calculate.code.switching.per.annotation.unit = function (corpus, language_tier, language_code) {
 
   code_switchings = corpus$morpheme.id
@@ -584,6 +597,8 @@ calculate.code.switching.per.annotation.unit = function (corpus, language_tier, 
   return(code_switchings)
 }
 
+## Function to calculate the length of the silent pause before each word,
+## if there is one. If there is no pause, the function sets pause length to 0.
 calculate.pause.before.word = function (corpus) {
   
   pauses = corpus$morpheme.id
@@ -625,6 +640,8 @@ calculate.pause.before.word = function (corpus) {
   return(pauses)
 }
 
+## Function to calculate the length of the silent pause after each word,
+## if there is one. If there is no pause, the function sets pause length to 0.
 calculate.pause.after.word = function (corpus) {
   
   pauses = corpus$morpheme.id
@@ -666,6 +683,8 @@ calculate.pause.after.word = function (corpus) {
   return(pauses)
 }
 
+## Function to count the number of false starts per annotation unit (called record in Toolbox)
+## (False starts have been annotated as "flst" or "flst_new" on the tier "fldps".)
 false.starts.per.record = function (corpus) {
 
   false_starts = corpus$word.id
@@ -689,6 +708,8 @@ false.starts.per.record = function (corpus) {
   return(false_starts)
 }
 
+## Function to count the number of filled pauses (like "uh" or "uhm") per annotation unit (called record in Toolbox)
+## (filled pauses have been annotated as "fldps" or "fldps_new" on the tier "fldps".)
 filled.pauses.per.record = function (corpus) {
 
   filled_pauses = corpus$word.id
@@ -712,7 +733,8 @@ filled.pauses.per.record = function (corpus) {
   return(filled_pauses)
 }
 
-# Function for calculating a dense ranking
+## Function for calculating a dense ranking for a vector of values
+## (used to sort word types according to their frequency)
 dense_rank = function (x) {
 
   return(rank(unique(x))[match(x, unique(x))])
@@ -721,7 +743,7 @@ dense_rank = function (x) {
 ## Function to list objects with class, size, etc.
 ## taken from https://stackoverflow.com/questions/1358003/tricks-to-manage-the-available-memory-in-an-r-session
 
-# improved list of objects
+## improved list of objects
 .ls.objects <- function (pos = 1, pattern, order.by,
                         decreasing=FALSE, head=FALSE, n=5) {
     napply <- function(names, fn) sapply(names, function(x)
@@ -746,54 +768,65 @@ dense_rank = function (x) {
     out
 }
 
-# shorthand
+## shorthand for the function .ls.objects
 lsos <- function(..., n=10) {
     .ls.objects(..., order.by="Size", decreasing=TRUE, head=TRUE, n=n)
 }
 
-##
 
-# Function to list all logs
+## Some useful helper functions for working with Taras Zakhako's ToolboxSearch library
+
+## Function to list all logs created during the importing of Toolbox files into R
+## (assumes that logs are stored with names containing ".parselog." in the environment)
 list_logs = function () {
   ls(pattern=".parselog.",envir=globalenv())
 }
 
-# Function to save all logs
+## Function to save all logs created during the importing of Toolbox files into R in one binary R file
+## (assumes that logs are stored with names containing ".parselog." in the environment)
 save_logs = function () {
   save(list=ls(pattern=".parselog.",envir=globalenv()),file=paste("backup/logs.",Sys.Date(),".RData",sep=""))
 }
 
-# Function to remove all logs from global environment
+## Function to remove all logs created during the importing of Toolbox files into R
+## (assumes that logs are stored with names containing ".parselog." in the environment)
 remove_logs = function () {
   rm(list=ls(pattern=".parselog.",envir=globalenv()),envir=globalenv())
 }
 
-# Function to list all models
+## Function to list all statistical models of type lmerMod, glmerMod, lm, glm, and gam
+## stored in the current environment
 list_models = function () {
   row.names(subset(lsos(n=10000),subset=Type %in% c("lmerMod","glmerMod","lm","glm","gam")))
 }
 
-# Function to save all logs
+## Function to save all statistical models of type lmerMod, glmerMod, lm, glm, and gam
+## stored in the current environment into a binary R file
 save_models = function () {
   save(list=row.names(subset(lsos(n=10000),subset=Type %in% c("lmerMod","glmerMod","lm","glm","gam"))),file=paste("backup/models.",Sys.Date(),".RData",sep=""))
 }
 
-# Function to remove all models from global environment
+## Function to remove all statistical models of type lmerMod, glmerMod, lm, glm, and gam
+## from global environment
 remove_models = function () {
   rm(list=row.names(subset(lsos(n=10000),subset=Type %in% c("lmerMod","glmerMod","lm","glm","gam"))),envir=globalenv())
 }
 
-# Function to list all ToolboxSearch format definitions
+## Function to list all ToolboxSearch format definitions in the environment
+## (assumes that these are stored with the suffix ".fmt")
 list_formats = function () {
   ls(pattern=".fmt",envir=globalenv())
 }
 
-# Function to save all ToolboxSearch format definitions
+## Function to save all ToolboxSearch format definitions in the environment
+## into a binary R file
+## (assumes that these are stored with the suffix ".fmt")
 save_formats = function () {
   save(list=ls(pattern=".fmt",envir=globalenv()),file=paste("backup/formats.",Sys.Date(),".RData",sep=""))
 }
 
-# Function to remove all ToolboxSearch format definitions from global environment
+## Function to remove all ToolboxSearch format definitions from the global environment
+## (assumes that these are stored with the suffix ".fmt")
 remove_formats = function () {
   rm(list=ls(pattern=".fmt",envir=globalenv()),envir=globalenv())
 }
