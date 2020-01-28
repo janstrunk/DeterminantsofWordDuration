@@ -1,7 +1,7 @@
 # Data preparation and analysis logs for the paper *Determinants of Phonetic Word Duration in Ten Language Documentation Corpora*
 This repository contains R scripts and analysis logs for the paper *Determinants of phonetic word duration in ten language documentation corpora* by Jan Strunk, Frank Seifart, Swintha Danielsen, Iren Hartmann, Brigitte Pakendorf, Søren Wichmann, Alena Witzlack-Makarevich, and Balthasar Bickel.
 
-This repository contains the following three files:
+The repository contains the following three files:
 
 file | description
 -----|-------------
